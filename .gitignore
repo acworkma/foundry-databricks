@@ -1,0 +1,30 @@
+# Bicep / Azure
+*.azure/
+main.json
+*.plan.json
+.bicep/
+
+# Local environment / secrets — never commit real values
+*.env
+.env
+*.local
+azd.env
+deployment-outputs.json
+*.tfvars
+
+# Databricks
+.databricks/
+databricks.yml.local
+
+# Python (custom MCP server, tooling)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
