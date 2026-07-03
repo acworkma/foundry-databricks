@@ -15,6 +15,11 @@ Environment variables:
 
 Usage:
   python run_sql.py sql/01_setup_catalog.sql sql/02_sample_data.sql ...
+  python run_sql.py --show-results sql/04_run_assessment.sql
+
+Flags:
+  --show-results (-r)   Print each statement's returned rows as a table. Handy
+                        for the assessment queries; defaults to row counts only.
 """
 import json
 import os
@@ -123,8 +128,41 @@ def run_statement(stmt):
     return result
 
 
+def format_result_table(result, max_rows=200):
+    """Render a statement's result set as a simple text table (stdlib only)."""
+    manifest = result.get("manifest", {})
+    columns = [c.get("name", "") for c in manifest.get("schema", {}).get("columns", [])]
+    rows = result.get("result", {}).get("data_array", []) or []
+    if not columns or not rows:
+        return ""
+    shown = rows[:max_rows]
+    widths = [
+        max([len(str(columns[i]))] + [len(str(r[i])) for r in shown])
+        for i in range(len(columns))
+    ]
+
+    def fmt(cells):
+        return " | ".join(str(cells[i]).ljust(widths[i]) for i in range(len(columns)))
+
+    lines = [
+        "        " + fmt(columns),
+        "        " + "-+-".join("-" * w for w in widths),
+    ]
+    lines += ["        " + fmt(r) for r in shown]
+    if len(rows) > max_rows:
+        lines.append(f"        ... {len(rows) - max_rows} more row(s)")
+    return "\n".join(lines)
+
+
 def main():
-    files = sys.argv[1:]
+    args = sys.argv[1:]
+    show_results = False
+    files = []
+    for arg in args:
+        if arg in ("--show-results", "-r"):
+            show_results = True
+        else:
+            files.append(arg)
     if not files:
         print(__doc__)
         sys.exit(1)
@@ -147,6 +185,10 @@ def main():
             rowcount = len(result.get("result", {}).get("data_array", []) or [])
             print(f"    [{i}] OK  {preview}"
                   + (f"  ({rowcount} rows)" if rowcount else ""))
+            if show_results and rowcount:
+                table = format_result_table(result)
+                if table:
+                    print(table)
 
     print("==> Done.")
 

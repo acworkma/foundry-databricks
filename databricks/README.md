@@ -56,12 +56,18 @@ export DATABRICKS_TOKEN="$(az account get-access-token \
 export DATABRICKS_CATALOG="datahub_demo"
 export DATABRICKS_SCHEMA="quality"
 
+# Create the schema, load sample data, and register the quality functions:
 python3 run_sql.py \
   sql/01_setup_catalog.sql \
   sql/02_sample_data.sql \
-  sql/03_quality_functions.sql \
-  sql/04_run_assessment.sql
+  sql/03_quality_functions.sql
+
+# Run the assessment and print the scorecard inline:
+python3 run_sql.py --show-results sql/04_run_assessment.sql
 ```
+
+`--show-results` (or `-r`) prints each statement's returned rows as a table, so the
+assessment scorecard and findings appear directly in your terminal.
 
 Find a warehouse id under **SQL Warehouses → (your warehouse) → Connection details**,
 or list them: `GET /api/2.0/sql/warehouses`.
