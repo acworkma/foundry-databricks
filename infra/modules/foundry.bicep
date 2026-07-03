@@ -30,7 +30,7 @@ param modelDeploymentName string = 'gpt-4.1'
 param modelSkuName string = 'GlobalStandard'
 
 @description('Capacity (tokens-per-minute in thousands) for the model deployment.')
-param modelCapacity int = 20
+param modelCapacity int = 50
 
 // AI Services account with Foundry project management enabled.
 resource account 'Microsoft.CognitiveServices/accounts@2025-06-01' = {

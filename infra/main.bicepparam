@@ -10,7 +10,7 @@ param environmentName = 'demo'
 param modelName = 'gpt-4.1'
 
 // Capacity in thousands of tokens per minute for the model deployment.
-param modelCapacity = 20
+param modelCapacity = 50
 
 // Optional: object ID of a user/group to grant "Foundry User" on the
 // Foundry account so they can build agents in the portal. Leave '' to skip.

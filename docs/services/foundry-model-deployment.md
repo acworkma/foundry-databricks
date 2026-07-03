@@ -19,7 +19,7 @@ tool-calling, which the agent relies on to invoke the Databricks MCP tools. Mode
 3. Set:
    - **Deployment name:** `<model-deployment-name>` (e.g. `gpt-4.1`).
    - **Deployment type:** **Global Standard**.
-   - **Capacity:** e.g. **20** (thousand tokens/min) — raise later if throttled.
+   - **Capacity:** e.g. **50** (thousand tokens/min) — raise later if throttled.
 4. **Deploy.**
 
 ## Bicep / CLI reference
@@ -28,7 +28,7 @@ Deployed by [`infra/modules/foundry.bicep`](../../infra/modules/foundry.bicep):
 resource modelDeployment 'Microsoft.CognitiveServices/accounts/deployments@2025-06-01' = {
   parent: account
   name: '<model-deployment-name>'
-  sku: { name: 'GlobalStandard', capacity: 20 }
+  sku: { name: 'GlobalStandard', capacity: 50 }
   properties: {
     model: { format: 'OpenAI', name: 'gpt-4.1' }
     versionUpgradeOption: 'OnceNewDefaultVersionAvailable'
@@ -43,7 +43,7 @@ az cognitiveservices account deployment create \
   --name <foundry-account> \
   --deployment-name <model-deployment-name> \
   --model-name gpt-4.1 --model-format OpenAI \
-  --sku-name GlobalStandard --sku-capacity 20
+  --sku-name GlobalStandard --sku-capacity 50
 ```
 
 ## Verify

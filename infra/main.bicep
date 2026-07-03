@@ -23,7 +23,7 @@ param environmentName string = 'demo'
 param modelName string = 'gpt-4.1'
 
 @description('Capacity (thousands of tokens per minute) for the model deployment.')
-param modelCapacity int = 20
+param modelCapacity int = 50
 
 @description('Object ID of a user or group to grant data-plane access (Foundry User). Leave empty to skip.')
 param developerPrincipalId string = ''
