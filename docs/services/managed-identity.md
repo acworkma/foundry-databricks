@@ -48,6 +48,6 @@ az role assignment create --assignee <principal-id> \
 - **Access control (IAM)** on target resources lists the expected role assignments.
 
 ## Next
-- Attach it to a compute resource (e.g. a Container App for
-  [Pattern E](../integration/pattern-e-custom-mcp-server.md)) via the resource's **Identity**
+- Attach it to a compute resource (e.g. a Container App for the
+  [custom MCP server](../integration/custom-mcp-server.md)) via the resource's **Identity**
   blade.

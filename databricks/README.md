@@ -82,7 +82,7 @@ run demonstrates the full severity range.
 ## How this maps to the agent
 
 - The `assess_*` functions and scalar scorers are exposed to Foundry as tools via the
-  **Unity Catalog Functions managed MCP server** (Pattern B — see
-  [`docs/integration/pattern-b-uc-functions-mcp.md`](../docs/integration/pattern-b-uc-functions-mcp.md)).
+  **Unity Catalog Functions managed MCP server** (see
+  [`docs/integration/uc-functions-managed-mcp.md`](../docs/integration/uc-functions-managed-mcp.md)).
 - Natural-language questions over the same tables are answered via a **Genie Space**
-  (Pattern A — see [`docs/integration/pattern-a-genie-mcp.md`](../docs/integration/pattern-a-genie-mcp.md)).
+  (see [`docs/integration/genie-managed-mcp.md`](../docs/integration/genie-managed-mcp.md)).

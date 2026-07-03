@@ -1,4 +1,4 @@
-# Pattern E — Custom MCP server (build-your-own)
+# Custom MCP server (build-your-own)
 
 **Status: documented only (not deployed in this demo).** &nbsp;·&nbsp; This is the
 "build-your-own" option for teams that need logic beyond what governed Unity Catalog
@@ -45,7 +45,7 @@ The server would expose an `assess_table` tool that, for any table:
    timeliness, consistency where FKs are known, accuracy from a rule pack).
 3. Runs them via the SQL Statement Execution API against a configured warehouse.
 4. Applies the same scoring model as the repo functions (`1 - issues/checks`, composite,
-   severity bands) so results are comparable to Pattern B.
+   severity bands) so results are comparable to the Unity Catalog Functions pattern.
 5. Returns the JSON output contract from [`agent/SKILL.md`](../../agent/SKILL.md) and,
    optionally, writes a row to a `quality.assessment_history` table for trending.
 
@@ -60,13 +60,14 @@ Execution API (auth, submit, poll) that this server would build on.
    identity; grant that identity access to Databricks and the warehouse.
 4. **Store config** (workspace host, warehouse id) as Container App settings; no secrets if
    using managed identity.
-5. **Register in Foundry** via the custom MCP tool flow (same as Pattern B Step 2), pointing
+5. **Register in Foundry** via the custom MCP tool flow (same as the Unity Catalog Functions
+   pattern's Step 2), pointing
    at `https://<container-app-fqdn>/mcp` with the appropriate authentication.
 6. **Add auth** — protect the endpoint (Entra / Easy Auth) and use OAuth identity passthrough
    or on-behalf-of so row-level Unity Catalog governance still applies.
 
-## Trade-offs vs. Patterns A & B
-| | Pattern A (Genie) | Pattern B (UC functions) | Pattern E (custom) |
+## Trade-offs vs. the other patterns
+| | Genie | UC functions | Custom MCP server |
 |-|-------------------|--------------------------|--------------------|
 | Arbitrary tables | ✅ | ❌ (per-table) | ✅ |
 | Deterministic | ⚠️ NL-driven | ✅ | ✅ |
@@ -74,8 +75,8 @@ Execution API (auth, submit, poll) that this server would build on.
 | Custom rule packs / history | ⚠️ limited | ⚠️ via more functions | ✅ |
 | Ops overhead | lowest | low | highest |
 
-Most teams should start with **A + B** (as this demo does) and only reach for **E** when they
-outgrow both.
+Most teams should start with **Genie + UC functions** (as this demo does) and only reach for a
+**custom MCP server** when they outgrow both.
 
 ## References
 - [Databricks SQL Statement Execution API](https://learn.microsoft.com/azure/databricks/sql/api/sql-execution-tutorial)

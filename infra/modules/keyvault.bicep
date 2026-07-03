@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------------
 // Key Vault — RBAC-authorized secret store (e.g. for a custom MCP server's
-// Databricks token in Pattern E). No access policies; uses Azure RBAC.
+// Databricks token). No access policies; uses Azure RBAC.
 // ---------------------------------------------------------------------------
 @description('Azure region for the vault.')
 param location string

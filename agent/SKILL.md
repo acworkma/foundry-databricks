@@ -4,7 +4,7 @@ A portable description of the **data quality assessment skill** the agent perfor
 written so it can be pasted into a Foundry agent's instructions, stored as a reusable
 "skill" document, or used as a knowledge-source file. It is intentionally
 tool-agnostic: the same skill works whether the agent reaches Databricks through the
-**Genie Space** (Pattern A) or the **Unity Catalog Functions** MCP server (Pattern B).
+**Genie Space** or the **Unity Catalog Functions** MCP server.
 
 ## Purpose
 
@@ -39,11 +39,11 @@ mean of the assessed dimensions (dimensions with no defined rule are reported as
 
 1. **Identify the target** table/view from the user's request. If ambiguous, ask.
 2. **Gather evidence** using the available tool:
-   - *Pattern B (preferred for the demo tables):* call the governed
+   - *Unity Catalog functions (preferred for the demo tables):* call the governed
      `assess_customers` / `assess_orders` / `assess_products` functions and the scalar
      scorers (`dq_ratio_score`, `dq_freshness_score`, `dq_composite`, `dq_severity`,
      `dq_recommend`).
-   - *Pattern A (arbitrary tables):* ask the Genie Space natural-language questions that
+   - *Genie (arbitrary tables):* ask the Genie Space natural-language questions that
      map to each dimension (see `agent/sample-prompts.md`).
 3. **Compute** the composite score and severity using the scoring model above.
 4. **Report** using the output contract below. Always cite the concrete numbers behind each

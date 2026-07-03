@@ -35,7 +35,8 @@ Databricks to the Foundry agent.
 
 ## Enable the Managed MCP Servers preview
 The MCP integration is Public Preview. Enable it under **Settings → Previews → Managed MCP
-Servers** (or ask a workspace admin). Required for Patterns A and B.
+Servers** (or ask a workspace admin). Required for the Genie and Unity Catalog Functions
+patterns.
 
 ## Bicep / CLI reference
 Deployed by [`infra/modules/databricks.bicep`](../../infra/modules/databricks.bicep):
@@ -64,5 +65,5 @@ az databricks workspace create \
 
 ## Next
 - Load data & functions: [`/databricks`](../../databricks).
-- Connect to Foundry: [Pattern A](../integration/pattern-a-genie-mcp.md),
-  [Pattern B](../integration/pattern-b-uc-functions-mcp.md).
+- Connect to Foundry: [Genie managed MCP](../integration/genie-managed-mcp.md),
+  [Unity Catalog Functions managed MCP](../integration/uc-functions-managed-mcp.md).

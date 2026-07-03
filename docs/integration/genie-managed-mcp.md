@@ -1,4 +1,4 @@
-# Pattern A — Genie Space managed MCP server
+# Genie Space managed MCP server
 
 **Status: built in this demo.** &nbsp;·&nbsp; **Preview:** Databricks managed MCP servers and
 Genie-in-Foundry are Public Preview.
@@ -10,8 +10,8 @@ into governed SQL over your Unity Catalog data — no glue code to write or host
 ## When to use it
 - You want **natural-language** access to **arbitrary** tables/views in a schema.
 - You want Databricks to own the SQL generation and governance.
-- Good complement to Pattern B: use governed functions for deterministic scoring, and Genie
-  for ad-hoc "why" questions.
+- Good complement to the Unity Catalog Functions pattern: use governed functions for
+  deterministic scoring, and Genie for ad-hoc "why" questions.
 
 ## How it works
 
@@ -75,7 +75,7 @@ https://<databricks-host>/api/2.0/mcp/genie/<genie-space-id>
    call Genie.
 
 ## Verify
-Ask the agent one of the Pattern A prompts from
+Ask the agent one of the Genie prompts from
 [`agent/sample-prompts.md`](../../agent/sample-prompts.md), e.g. *"How many customers are
 missing an email address?"* The agent should call Genie and return a grounded answer.
 
@@ -84,7 +84,7 @@ missing an email address?"* The agent should call Genie and return a grounded an
   pay-as-you-go).
 - Genie quality depends on good Space instructions and clear table/column comments.
 - Genie is best for exploratory NL questions; for **repeatable, deterministic scoring** use
-  the Unity Catalog functions in [Pattern B](pattern-b-uc-functions-mcp.md).
+  the [Unity Catalog Functions managed MCP server](uc-functions-managed-mcp.md).
 - Not ARM/Bicep-deployable today — the Space and the Foundry tool connection are portal
   steps.
 

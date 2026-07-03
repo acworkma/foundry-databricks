@@ -10,7 +10,7 @@
 --
 -- Why per-table functions? SQL UDFs cannot run dynamic SQL, so a single
 -- "assess any table" function is not possible in pure SQL. For arbitrary
--- tables, use the Genie Space (Pattern A) or the custom MCP server (Pattern E),
+-- tables, use the Genie Space or the custom MCP server,
 -- both of which can generate SQL dynamically.
 --
 -- All object names are fully qualified with ${CATALOG}.${SCHEMA} so the script

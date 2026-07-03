@@ -80,5 +80,5 @@ consistency check. Line items for order `1009` sum to less than its stated total
 Unity Catalog SQL functions cannot execute dynamic SQL, so a single "assess any table"
 function is not possible in pure SQL. The repo ships explicit `assess_customers`,
 `assess_orders`, and `assess_products` functions. For **arbitrary** tables, use the Genie
-Space (Pattern A) or a custom MCP server (Pattern E), both of which can generate SQL
+Space or a custom MCP server, both of which can generate SQL
 dynamically.

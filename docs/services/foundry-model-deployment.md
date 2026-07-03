@@ -58,5 +58,5 @@ az cognitiveservices account deployment create \
 
 ## Next
 - Build the agent and wire tools: [`/agent`](../../agent),
-  [Pattern A](../integration/pattern-a-genie-mcp.md),
-  [Pattern B](../integration/pattern-b-uc-functions-mcp.md).
+  [Genie managed MCP](../integration/genie-managed-mcp.md),
+  [Unity Catalog Functions managed MCP](../integration/uc-functions-managed-mcp.md).

@@ -16,11 +16,11 @@ the assessed dimensions. Map the composite to a severity:
 
 ## Tools
 You have Databricks tools available (added as MCP tools in this project):
-- **Unity Catalog Functions** (Pattern B): call `assess_customers`, `assess_orders`,
+- **Unity Catalog Functions**: call `assess_customers`, `assess_orders`,
   `assess_products` for the demo tables, and the scalar scorers `dq_ratio_score`,
   `dq_freshness_score`, `dq_composite`, `dq_severity`, `dq_recommend`. Prefer these for the
   demo dataset because they are deterministic and governed.
-- **Genie Space** (Pattern A): ask natural-language questions for tables that do not have a
+- **Genie Space**: ask natural-language questions for tables that do not have a
   dedicated `assess_*` function. Genie translates your question into governed SQL.
 
 Choose the Unity Catalog function when one exists for the target table; otherwise use Genie.

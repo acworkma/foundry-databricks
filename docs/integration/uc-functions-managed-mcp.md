@@ -1,4 +1,4 @@
-# Pattern B — Unity Catalog Functions managed MCP server
+# Unity Catalog Functions managed MCP server
 
 **Status: built in this demo.** &nbsp;·&nbsp; **Preview:** Databricks managed MCP servers are
 Public Preview.
@@ -47,10 +47,10 @@ that includes:
 ## Why per-table functions?
 Unity Catalog SQL functions **cannot run dynamic SQL**, so a single "assess any table"
 function is not possible in pure SQL. This demo ships explicit `assess_*` functions for the
-sample tables. For arbitrary tables, use [Pattern A (Genie)](pattern-a-genie-mcp.md) or
-[Pattern E (custom MCP server)](pattern-e-custom-mcp-server.md), both of which generate SQL
-dynamically. This is a deliberate trade-off: Pattern B buys determinism and governance at
-the cost of generality.
+sample tables. For arbitrary tables, use the [Genie managed MCP server](genie-managed-mcp.md)
+or a [custom MCP server](custom-mcp-server.md), both of which generate SQL
+dynamically. This is a deliberate trade-off: governed functions buy determinism and
+governance at the cost of generality.
 
 ## Prerequisites
 - Sample data **and** functions loaded (run `01`–`03` from [`/databricks`](../../databricks)).
@@ -82,7 +82,7 @@ it like there is for Genie), so add it via the generic MCP tool flow:
 4. Select **Connect**, then **Save** to attach the tool to the agent.
 
 ## Step 3 — Consent and test
-1. In the agent Playground, enter a Pattern B prompt (see
+1. In the agent Playground, enter a governed-function prompt (see
    [`agent/sample-prompts.md`](../../agent/sample-prompts.md)), e.g. *"Assess the customers
    table and give me the composite score and severity."*
 2. If using OAuth passthrough, click **Open Consent** and sign in with your Entra account.

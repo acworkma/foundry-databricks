@@ -23,8 +23,8 @@ flowchart TB
         FN --> UC
     end
 
-    AG -- Pattern A: Genie managed MCP --> GEN
-    AG -- Pattern B: Functions managed MCP --> FN
+    AG -- Genie managed MCP --> GEN
+    AG -- Functions managed MCP --> FN
 
     subgraph Platform[Supporting Azure services]
         MI[Managed identity]
@@ -42,7 +42,7 @@ flowchart TB
 | Layer | Service | Role |
 |-------|---------|------|
 | Reasoning | **Microsoft Foundry** account + project + `gpt-4.1` | Hosts the agent and the chat model that plans tool calls and writes the report. |
-| Data & logic | **Azure Databricks** + Unity Catalog | Stores the sample data; hosts the Genie Space (Pattern A) and the governed quality functions (Pattern B). |
+| Data & logic | **Azure Databricks** + Unity Catalog | Stores the sample data; hosts the Genie Space and the governed quality functions. |
 | Integration | **Managed MCP servers** | Databricks-hosted MCP endpoints that expose Genie and UC functions to the agent as tools. |
 | Identity | **User-assigned managed identity** | Passwordless auth pattern between services. |
 | Secrets | **Key Vault** | Holds any connection secrets (RBAC-authorized). |
@@ -55,12 +55,12 @@ The repo builds two Foundry↔Databricks patterns and documents a third:
 
 | Pattern | Built? | Summary |
 |---------|--------|---------|
-| [A — Genie managed MCP](integration/pattern-a-genie-mcp.md) | ✅ Built | Natural-language questions over any table in a Genie Space. |
-| [B — UC Functions managed MCP](integration/pattern-b-uc-functions-mcp.md) | ✅ Built | Deterministic, governed scoring functions called as tools. |
-| [E — Custom MCP server](integration/pattern-e-custom-mcp-server.md) | 📄 Documented | Build-your-own MCP server on Container Apps for arbitrary-table logic. |
+| [Genie managed MCP](integration/genie-managed-mcp.md) | ✅ Built | Natural-language questions over any table in a Genie Space. |
+| [UC Functions managed MCP](integration/uc-functions-managed-mcp.md) | ✅ Built | Deterministic, governed scoring functions called as tools. |
+| [Custom MCP server](integration/custom-mcp-server.md) | 📄 Documented | Build-your-own MCP server on Container Apps for arbitrary-table logic. |
 
-See each page for the trade-offs. In short: **B** for repeatable scoring, **A** for ad-hoc
-questions, **E** when you outgrow both.
+See each page for the trade-offs. In short: **UC functions** for repeatable scoring, **Genie**
+for ad-hoc questions, and a **custom MCP server** when you outgrow both.
 
 ## The six-dimension quality model
 
@@ -69,7 +69,7 @@ Completeness, uniqueness, validity, timeliness, consistency, accuracy. Each is s
 (Healthy / Needs Attention / High Risk / Critical) with a recommended action. Full
 definition and output contract: [`agent/SKILL.md`](../agent/SKILL.md).
 
-## Request flow (Pattern B example)
+## Request flow (UC Functions example)
 1. A user asks the agent to "assess the customers table."
 2. `gpt-4.1` plans a call to the `assess_customers` tool (functions managed MCP).
 3. Databricks executes the governed function and returns a per-dimension scorecard.

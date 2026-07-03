@@ -1,11 +1,10 @@
 # Sample prompts
 
 Prompts to exercise the Data Quality Agent once the Databricks tools are connected. The
-first group works against the seeded demo tables via the Unity Catalog Functions tool
-(Pattern B); the second group shows natural-language questions routed to the Genie Space
-(Pattern A).
+first group works against the seeded demo tables via the Unity Catalog Functions tool;
+the second group shows natural-language questions routed to the Genie Space.
 
-## Pattern B — governed function calls (demo tables)
+## Governed function calls (demo tables)
 
 - "Assess the quality of the customers table and give me the composite score and severity."
 - "Score the orders table across all six dimensions and list the top issues."
@@ -19,7 +18,7 @@ computes the composite with `dq_composite`, classifies it with `dq_severity`, an
 scored report. `products` should come back Healthy; `customers` and `orders` should surface
 findings and land in the High Risk / Needs Attention range.
 
-## Pattern A — natural language via Genie
+## Natural language via Genie
 
 - "How many customers are missing an email address?"
 - "Are there any duplicate customer IDs?"

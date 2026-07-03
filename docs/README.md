@@ -24,9 +24,9 @@ Foundry agent connected to Azure Databricks. Every page is written so you can fo
 ## Foundry ↔ Databricks integration patterns
 | Pattern | Status | Page |
 |---------|--------|------|
-| A — Genie Space managed MCP | Built | [pattern-a-genie-mcp.md](integration/pattern-a-genie-mcp.md) |
-| B — Unity Catalog Functions managed MCP | Built | [pattern-b-uc-functions-mcp.md](integration/pattern-b-uc-functions-mcp.md) |
-| E — Custom MCP server (Container Apps) | Documented | [pattern-e-custom-mcp-server.md](integration/pattern-e-custom-mcp-server.md) |
+| Genie Space managed MCP | Built | [genie-managed-mcp.md](integration/genie-managed-mcp.md) |
+| Unity Catalog Functions managed MCP | Built | [uc-functions-managed-mcp.md](integration/uc-functions-managed-mcp.md) |
+| Custom MCP server (Container Apps) | Documented | [custom-mcp-server.md](integration/custom-mcp-server.md) |
 
 ## Related folders
 - [`/infra`](../infra) — Bicep to deploy the environment.

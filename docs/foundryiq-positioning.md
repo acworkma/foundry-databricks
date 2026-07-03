@@ -20,7 +20,7 @@ not a document-retrieval problem.
 | Requirement | Managed MCP over Databricks (A/B) | FoundryIQ (RAG) |
 |-------------|-----------------------------------|-----------------|
 | Live counts/aggregations over tables | ✅ SQL executes on current data | ❌ retrieves indexed text, doesn't compute |
-| Deterministic, reproducible scores | ✅ (Pattern B functions) | ❌ answers vary with retrieval/model |
+| Deterministic, reproducible scores | ✅ (UC functions) | ❌ answers vary with retrieval/model |
 | Cross-table reconciliation (consistency) | ✅ joins in SQL | ❌ |
 | Data freshness (timeliness) | ✅ reads max timestamps now | ❌ index can be stale |
 | Unity Catalog governance / row-level security | ✅ enforced at query time | ⚠️ depends on indexing pipeline |
