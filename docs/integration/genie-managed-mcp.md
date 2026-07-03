@@ -46,8 +46,10 @@ https://<databricks-host>/api/2.0/mcp/genie/<genie-space-id>
   Foundry project.
 
 ## Step 1 — Create a Genie Space over the sample data
-1. In the Databricks workspace, open **Genie** (SQL → Genie, or the Genie icon).
-2. Click **New** → give it a name like `DataHub Quality`.
+1. In the Databricks workspace, look at the **left sidebar**. Under the **SQL** heading
+   (below Workspace / Catalog / Compute), click **Genie Spaces**.
+2. On the Genie Spaces page, click the **New** button (top of the page) to create a Space,
+   and give it a name like `DataHub Quality`.
 3. Set the **SQL warehouse** it should use (the Serverless Starter Warehouse is fine).
 4. Add the sample tables as the Space's data: `<catalog>.<schema>.customers`, `.orders`,
    `.order_items`, `.products`.
@@ -59,7 +61,9 @@ https://<databricks-host>/api/2.0/mcp/genie/<genie-space-id>
    - "List orders where ship_date < order_date."
 6. Ask a couple of the sample questions in the Genie UI to confirm it returns sensible SQL
    and rows.
-7. Copy the **Space ID** from the URL: `https://<databricks-host>/genie/rooms/<space-id>`.
+7. Copy the **Space ID** from the browser address bar while the Space is open — the URL
+   looks like `https://<databricks-host>/genie/rooms/<space-id>`, and `<space-id>` is the
+   part after `/rooms/`.
 
 ## Step 2 — Add Genie as a tool in Foundry
 1. In **Microsoft Foundry**, click **Tools** on the sidebar.
