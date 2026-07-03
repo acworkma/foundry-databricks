@@ -22,7 +22,7 @@ Databricks through managed **MCP** tools.
 - Databricks sample data + functions loaded (see [`/databricks`](../databricks)).
 - A **Genie Space** over the sample tables (see
   [`docs/integration/genie-managed-mcp.md`](../docs/integration/genie-managed-mcp.md)).
-- Roles: **Azure AI Developer** on the project to create agents; a Databricks user/service
+- Roles: **Foundry User** on the project to create agents; a Databricks user/service
   principal that can read the target catalog.
 
 ## Steps

@@ -29,7 +29,7 @@ Edit `main.bicepparam`:
 | `environmentName` | `demo` | Environment suffix (e.g. dev/test/demo). |
 | `modelName` | `gpt-4.1` | Chat model to deploy. |
 | `modelCapacity` | `20` | Deployment capacity (thousand tokens/min). |
-| `developerPrincipalId` | `''` | Optional object ID to grant **Azure AI Developer** on the Foundry account (find yours: `az ad signed-in-user show --query id -o tsv`). Leave empty to skip. |
+| `developerPrincipalId` | `''` | Optional object ID to grant **Foundry User** on the Foundry account (find yours: `az ad signed-in-user show --query id -o tsv`). Leave empty to skip. |
 
 ## Deploy
 

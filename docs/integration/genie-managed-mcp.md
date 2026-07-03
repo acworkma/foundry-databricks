@@ -42,7 +42,7 @@ https://<databricks-host>/api/2.0/mcp/genie/<genie-space-id>
   The **Previews** menu item and toggles only appear if you're a **workspace admin**. If you
   don't see it, you're not an admin — ask one to enable the preview for the workspace.
 - A Foundry project with a chat model deployment (`gpt-4.1`).
-- Roles: a Databricks identity that can read the catalog; **Azure AI Developer** on the
+- Roles: a Databricks identity that can read the catalog; **Foundry User** on the
   Foundry project.
 
 ## Step 1 — Create a Genie Space over the sample data

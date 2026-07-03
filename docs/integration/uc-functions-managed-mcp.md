@@ -59,7 +59,7 @@ governance at the cost of generality.
   [Databricks workspace → Enable the Managed MCP Servers preview](../services/databricks-workspace.md#enable-the-managed-mcp-servers-preview).
 - A Foundry project with a `gpt-4.1` deployment.
 - Roles: a Databricks identity with `USE CATALOG` / `USE SCHEMA` / `EXECUTE` on the
-  functions; **Azure AI Developer** on the Foundry project.
+  functions; **Foundry User** on the Foundry project.
 
 ## Step 1 — Confirm the functions exist
 In a Databricks SQL editor:

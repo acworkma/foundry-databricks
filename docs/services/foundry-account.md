@@ -28,8 +28,15 @@ https://<foundry-account>.services.ai.azure.com/api/projects/<project-name>
 ```
 
 ## Roles
-- **Azure AI Developer** on the project to build agents and add tools.
+- **Foundry User** on the project to build agents and add tools (data-plane access).
+- **Foundry Project Manager** if the same identity also needs to deploy or manage models.
 - **Cognitive Services User** to call the deployed models.
+
+> The **Foundry** RBAC roles (Foundry User / Owner / Project Manager / Account Owner) were
+> recently renamed from the older *Azure AI User / Owner / Project Manager / Account Owner*
+> names; the role IDs are unchanged. The legacy **Azure AI Developer** role is *not* a Foundry
+> project role — it targets Azure Machine Learning workspaces and hub-based projects, so use
+> the Foundry roles above for this account.
 
 ## Bicep / CLI reference
 Deployed by [`infra/modules/foundry.bicep`](../../infra/modules/foundry.bicep):

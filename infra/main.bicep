@@ -25,7 +25,7 @@ param modelName string = 'gpt-4.1'
 @description('Capacity (thousands of tokens per minute) for the model deployment.')
 param modelCapacity int = 20
 
-@description('Object ID of a user or group to grant data-plane access (Azure AI Developer). Leave empty to skip.')
+@description('Object ID of a user or group to grant data-plane access (Foundry User). Leave empty to skip.')
 param developerPrincipalId string = ''
 
 @description('Tags applied to every resource.')
@@ -49,7 +49,7 @@ var roleIds = {
   keyVaultSecretsUser: '4633458b-17de-408a-b874-0445c86b69e6'
   storageBlobDataContributor: 'ba92f5b4-2d11-453d-a403-e96b0029c9fe'
   cognitiveServicesUser: 'a97b65f3-24c7-4388-baec-2e87135dc908'
-  azureAIDeveloper: '64702f94-c441-49e6-a78b-ef80e0188fee'
+  foundryUser: '53ca6127-db72-4b80-b1b0-d745d6d5456d'
 }
 
 // --------------------------- Observability ---------------------------------
@@ -163,12 +163,12 @@ module miCognitiveUser 'modules/roleAssignment.bicep' = {
 }
 
 // Optional: grant a human developer/group data-plane access to build agents.
-module devAIDeveloper 'modules/roleAssignment.bicep' = if (!empty(developerPrincipalId)) {
-  name: 'ra-dev-ai-developer'
+module devFoundryUser 'modules/roleAssignment.bicep' = if (!empty(developerPrincipalId)) {
+  name: 'ra-dev-foundry-user'
   params: {
     principalId: developerPrincipalId
     principalType: 'User'
-    roleDefinitionId: roleIds.azureAIDeveloper
+    roleDefinitionId: roleIds.foundryUser
     targetKind: 'cognitiveservices'
     targetName: foundryAccountName
   }
