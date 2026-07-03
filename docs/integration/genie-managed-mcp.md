@@ -46,22 +46,41 @@ https://<databricks-host>/api/2.0/mcp/genie/<genie-space-id>
   Foundry project.
 
 ## Step 1 — Create a Genie Space over the sample data
-1. In the Databricks workspace, look at the **left sidebar**. Under the **SQL** heading
-   (below Workspace / Catalog / Compute), click **Genie Spaces**.
-2. On the Genie Spaces page, click the **New** button (top of the page) to create a Space,
-   and give it a name like `DataHub Quality`.
-3. Set the **SQL warehouse** it should use (the Serverless Starter Warehouse is fine).
-4. Add the sample tables as the Space's data: `<catalog>.<schema>.customers`, `.orders`,
-   `.order_items`, `.products`.
-5. Add a few **instructions / example questions** so Genie answers quality questions well,
-   for example:
-   - "Count rows where email is null in customers."
-   - "Find duplicate customer_id values."
-   - "List orders whose order_total ≠ sum of order_items."
-   - "List orders where ship_date < order_date."
-6. Ask a couple of the sample questions in the Genie UI to confirm it returns sensible SQL
-   and rows.
-7. Copy the **Space ID** from the browser address bar while the Space is open — the URL
+
+Creating a Space happens in two phases: first you pick the tables and click **Create**, then
+you configure the warehouse, name, and example questions *inside* the Space. The create
+dialog only asks for data — everything else comes afterward.
+
+**1a. Create the Space (pick the data)**
+1. In the Databricks workspace **left sidebar**, under the **SQL** heading (below Workspace /
+   Catalog / Compute), click **Genie Spaces**.
+2. Click the **New** button in the upper-right.
+3. A **Connect your data** dialog opens. In the search box, find and select the four sample
+   tables — `customers`, `orders`, `order_items`, and `products` (they appear as
+   `<catalog>.<schema>.<table>`). Selected tables get a checkmark.
+4. Click **Create**. The new Space opens.
+
+**1b. Configure the Space (name, warehouse, questions)**
+
+These controls live inside the Space, not in the create dialog:
+1. When the Space opens, **Genie Code** may run automatically and suggest table descriptions
+   and example queries. Review them and **Accept** the useful ones (this improves accuracy).
+2. Click **Configure → Settings** (top of the Space) and set:
+   - **Title** — e.g. `DataHub Quality`.
+   - **Default warehouse** — pick a pro or serverless SQL warehouse (the Serverless Starter
+     Warehouse is fine). This is where the warehouse gets set; the queries Genie generates
+     run on it.
+   - **Common questions** (optional) — add example prompts that show on the chat landing
+     page, such as:
+     - "Count rows where email is null in customers."
+     - "Find duplicate customer_id values."
+     - "List orders whose order_total ≠ sum of order_items."
+     - "List orders where ship_date < order_date."
+3. (Optional but recommended) Add general **instructions** / example SQL from the
+   **Instructions** panel to further tune answer quality.
+4. Ask a couple of the example questions in the Space's chat to confirm Genie returns
+   sensible SQL and rows.
+5. Copy the **Space ID** from the browser address bar while the Space is open — the URL
    looks like `https://<databricks-host>/genie/rooms/<space-id>`, and `<space-id>` is the
    part after `/rooms/`.
 
