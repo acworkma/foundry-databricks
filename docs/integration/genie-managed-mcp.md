@@ -60,29 +60,36 @@ dialog only asks for data — everything else comes afterward.
    `<catalog>.<schema>.<table>`). Selected tables get a checkmark.
 4. Click **Create**. The new Space opens.
 
-**1b. Configure the Space (name, warehouse, questions)**
+**1b. Configure the Space (About / Data / Instructions)**
 
-These controls live inside the Space, not in the create dialog:
-1. When the Space opens, **Genie Code** may run automatically and suggest table descriptions
-   and example queries. Review them and **Accept** the useful ones (this improves accuracy).
-2. Click **Configure → Settings** (top of the Space) and set:
-   - **Title** — e.g. `DataHub Quality`.
-   - **Default warehouse** — pick a pro or serverless SQL warehouse (the Serverless Starter
-     Warehouse is fine). This is where the warehouse gets set; the queries Genie generates
-     run on it.
-   - **Common questions** (optional) — add example prompts that show on the chat landing
-     page, such as:
-     - "Count rows where email is null in customers."
-     - "Find duplicate customer_id values."
-     - "List orders whose order_total ≠ sum of order_items."
-     - "List orders where ship_date < order_date."
-3. (Optional but recommended) Add general **instructions** / example SQL from the
-   **Instructions** panel to further tune answer quality.
-4. Ask a couple of the example questions in the Space's chat to confirm Genie returns
-   sensible SQL and rows.
-5. Copy the **Space ID** from the browser address bar while the Space is open — the URL
-   looks like `https://<databricks-host>/genie/rooms/<space-id>`, and `<space-id>` is the
-   part after `/rooms/`.
+Inside the Space, the configuration panel has three tabs across the top — **About**,
+**Data**, and **Instructions**. When the Space opens, **Genie** may auto-suggest a
+description and common questions; you can accept those or set your own.
+
+- **About tab** — the main details:
+  - **Name** — click the pencil (top-right of *About this space*) and rename it to
+    `DataHub Quality`.
+  - **Warehouse** — this is where the SQL warehouse is shown/set. A default (e.g. *Serverless
+    Starter Warehouse*) is usually pre-filled; change it with the same pencil if needed.
+  - **Description** — Genie proposes one under *Genie Suggested Description*; click **Accept**
+    (or **Edit**).
+  - **Space ID** — copy the value shown here; you'll paste it into Foundry in Step 2. (It's
+    also in the URL after `/rooms/`.)
+  - **Common questions** — Genie pre-fills suggestions; click the **+** next to one to keep
+    it, or the pencil to add your own.
+- **Data tab** — confirm the four sample tables are listed (`products`, `orders`,
+  `order_items`, `customers`). Use **+ Add** to add more or the pencil to describe columns.
+- **Instructions tab** — optional but recommended for quality. On the **Text** sub-tab, add a
+  short line of *General Instructions* (e.g. "This is a synthetic data-quality demo; prefer
+  simple aggregate answers."). The **Joins**, **SQL Expressions**, and **SQL Queries**
+  sub-tabs let you supply example joins/queries.
+
+**Test it:** in the Space's chat, ask:
+
+> **How many customers are missing an email address?**
+
+With the shipped sample data this returns **1**. If Genie generates SQL and answers, the
+Space is working.
 
 ## Step 2 — Add Genie as a tool in Foundry
 1. In **Microsoft Foundry**, click **Tools** on the sidebar.
