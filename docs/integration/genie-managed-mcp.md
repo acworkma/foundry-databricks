@@ -33,8 +33,14 @@ https://<databricks-host>/api/2.0/mcp/genie/<genie-space-id>
 
 ## Prerequisites
 - A **Unity Catalog-enabled** workspace with the sample data loaded (see [`/databricks`](../../databricks)).
-- The **Managed MCP Servers** preview enabled for the workspace
-  (**Settings → Previews**, or ask a workspace admin).
+- The **Managed MCP Servers** workspace preview turned **on**. This is a Databricks portal
+  toggle — it is *not* something this repo's Bicep provisions. To check or enable it:
+  1. In the Databricks workspace, click your **username** (top-right corner).
+  2. Select **Previews** from the menu.
+  3. Find **Managed MCP Servers** in the list and switch its toggle **On**.
+
+  The **Previews** menu item and toggles only appear if you're a **workspace admin**. If you
+  don't see it, you're not an admin — ask one to enable the preview for the workspace.
 - A Foundry project with a chat model deployment (`gpt-4.1`).
 - Roles: a Databricks identity that can read the catalog; **Azure AI Developer** on the
   Foundry project.

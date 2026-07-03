@@ -34,9 +34,16 @@ Databricks to the Foundry agent.
 > `MANAGED LOCATION` in SQL), then point the repo's `${CATALOG}` at it.
 
 ## Enable the Managed MCP Servers preview
-The MCP integration is Public Preview. Enable it under **Settings → Previews → Managed MCP
-Servers** (or ask a workspace admin). Required for the Genie and Unity Catalog Functions
-patterns.
+The MCP integration is Public Preview and is turned on with a Databricks portal toggle — it
+is *not* provisioned by this repo's Bicep. Enable it once per workspace:
+
+1. In the Databricks workspace, click your **username** (top-right corner).
+2. Select **Previews** from the menu.
+3. Find **Managed MCP Servers** and switch its toggle **On**.
+
+The **Previews** menu and toggles only appear for **workspace admins**. If you don't see
+them, ask a workspace admin to enable the preview. Required for both the Genie and Unity
+Catalog Functions integration patterns.
 
 ## Bicep / CLI reference
 Deployed by [`infra/modules/databricks.bicep`](../../infra/modules/databricks.bicep):
