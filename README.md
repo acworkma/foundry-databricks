@@ -78,7 +78,3 @@ docs/
   are in **Public Preview**. Enable the relevant workspace previews before you begin.
 - All sample data is **synthetic and contains no PII/PHI**. Keep real assessments free of sensitive sample
   values per your organization's governance policy.
-
-## License
-
-See [`LICENSE`](LICENSE).
