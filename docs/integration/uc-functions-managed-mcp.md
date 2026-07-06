@@ -62,11 +62,13 @@ governance at the cost of generality.
   functions; **Foundry User** on the Foundry project.
 
 ## Step 1 — Confirm the functions exist
-In a Databricks SQL editor:
+Open a SQL editor: in the left sidebar under **SQL**, click **SQL Editor**, then **+ New query**. Pick a running **SQL warehouse** in the selector at the top of the editor.
+
+Run the following, replacing `<catalog>` and `<schema>` with the names you used in setup (for example the catalog and its `quality` schema). The angle brackets are placeholders — a statement like `SHOW USER FUNCTIONS IN <catalog>.<schema>;` left as-is will fail with a `PARSE_SYNTAX_ERROR`:
 ```sql
 SHOW USER FUNCTIONS IN <catalog>.<schema>;
 ```
-You should see the `dq_*` and `assess_*` functions. Sanity-check one:
+Click **Run** (Ctrl+Enter). You should see the `dq_*` and `assess_*` functions. Sanity-check one:
 ```sql
 SELECT * FROM <catalog>.<schema>.assess_customers();
 ```
