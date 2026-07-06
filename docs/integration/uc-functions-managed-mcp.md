@@ -74,6 +74,10 @@ SELECT * FROM <catalog>.<schema>.assess_customers();
 ```
 
 ## Step 2 — Add the functions MCP server as a tool in Foundry
+Use the **same agent** you connected Genie to, or create one first (see
+[`agent/README.md`](../../agent/README.md)). An agent holds multiple tools, so adding the
+functions server sits **alongside** Genie — it does not replace it.
+
 The functions server is a **custom/remote MCP** connection (there is no first-party tile for
 it like there is for Genie), so add it via the generic MCP tool flow:
 1. In **Microsoft Foundry**, open your agent → **Playground** → **Tools** dropdown → **Add**.
