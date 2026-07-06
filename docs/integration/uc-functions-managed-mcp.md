@@ -80,14 +80,18 @@ functions server sits **alongside** Genie — it does not replace it.
 
 The functions server is a **custom/remote MCP** connection (there is no first-party tile for
 it like there is for Genie), so add it via the generic MCP tool flow:
-1. In **Microsoft Foundry**, open your agent → **Playground** → **Tools** dropdown → **Add**.
-2. On the **Custom** tab, select **Model Context Protocol (MCP)** → **Create**.
-3. Fill in:
+1. In **Microsoft Foundry**, open your agent. In the right-hand **Setup** pane, find the
+   **Tools** section (it already lists **Azure Databricks Genie** from the other pattern).
+2. Click **Add**, then choose **Browse all tools** at the bottom of the menu.
+3. In the **Select a tool** dialog, open the **Custom** tab and choose
+   **Model Context Protocol (MCP)** ("Give the agent access to tools hosted on an existing
+   MCP endpoint").
+4. Fill in:
    - **Name:** e.g. `databricks-uc-functions`.
    - **Remote MCP Server endpoint:**
      `https://<databricks-host>/api/2.0/mcp/functions/<catalog>/<schema>`.
    - **Authentication:** OAuth identity passthrough (**Managed** / Entra recommended).
-4. Select **Connect**, then **Save** to attach the tool to the agent.
+5. Select **Connect**, then **Create** to attach the tool to the agent.
 
 ## Step 3 — Consent and test
 1. In the agent Playground, enter a governed-function prompt (see
