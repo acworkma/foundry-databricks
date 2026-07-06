@@ -176,4 +176,4 @@ without re-granting.
 ## References
 - [Azure Databricks managed MCP servers](https://learn.microsoft.com/azure/databricks/generative-ai/mcp/managed-mcp)
 - [Unity Catalog SQL UDFs](https://learn.microsoft.com/azure/databricks/udf/unity-catalog)
-- [Connect an MCP server to a Foundry agent](https://learn.microsoft.com/azure/azure-functions/functions-mcp-foundry-tools)
+- [Connect an MCP server to a Foundry agent](https://learn.microsoft.com/azure/foundry/agents/how-to/tools/model-context-protocol)
