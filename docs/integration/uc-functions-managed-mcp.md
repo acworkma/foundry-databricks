@@ -84,8 +84,7 @@ it like there is for Genie), so add it via the generic MCP tool flow:
    **Tools** section (it already lists **Azure Databricks Genie** from the other pattern).
 2. Click **Add**, then choose **Browse all tools** at the bottom of the menu.
 3. In the **Select a tool** dialog, open the **Custom** tab and choose
-   **Model Context Protocol (MCP)** ("Give the agent access to tools hosted on an existing
-   MCP endpoint").
+   **Model Context Protocol (MCP)**.
 4. Fill in:
    - **Name:** e.g. `databricks-uc-functions`.
    - **Remote MCP Server endpoint:**
