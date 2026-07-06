@@ -2,8 +2,10 @@
 
 Synthetic, **non-PII / non-PHI** data created by `sql/02_sample_data.sql`. Every value is
 fabricated. The dataset is deliberately small so the assessment output is easy to read, and
-it contains **known, intentional defects** so each of the six quality dimensions produces a
-visible finding.
+it contains **known, intentional defects** so that, across the dataset, every one of the six
+quality dimensions produces at least one visible finding. The defects are distributed by table:
+`products` is a clean baseline, while `customers` and `orders` each carry defects in four
+dimensions (see the per-table breakdowns below).
 
 Default location: `datahub_demo.quality` (override with `${CATALOG}` / `${SCHEMA}`).
 
