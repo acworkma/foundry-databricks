@@ -58,8 +58,8 @@ governance at the cost of generality.
   **username → Previews** (workspace admin required). See
   [Databricks workspace → Enable the Managed MCP Servers preview](../services/databricks-workspace.md#enable-the-managed-mcp-servers-preview).
 - A Foundry project with a `gpt-4.1` deployment.
-- Roles: a Databricks identity with `USE CATALOG` / `USE SCHEMA` / `EXECUTE` on the
-  functions; **Foundry User** on the Foundry project.
+- Workspace-admin access to Databricks (to register a service principal and run `GRANT`s),
+  and **Foundry User** (or higher) on the Foundry project.
 
 ## Step 1 — Confirm the functions exist
 Open a SQL editor: in the left sidebar under **SQL**, click **SQL Editor**, then **+ New query**. Pick a running **SQL warehouse** in the selector at the top of the editor.
@@ -73,7 +73,41 @@ Click **Run** (Ctrl+Enter). You should see the `dq_*` and `assess_*` functions. 
 SELECT * FROM <catalog>.<schema>.assess_customers();
 ```
 
-## Step 2 — Add the functions MCP server as a tool in Foundry
+## Step 2 — Authorize the Foundry project's managed identity in Databricks
+The functions MCP server authenticates with **Microsoft Entra**. The cleanest option is the
+Foundry **project's managed identity** — a service identity, so there is **no user sign-in, no
+OAuth app, and no personal access token**. Before Foundry can call the functions, that identity
+must exist in Databricks and hold the right Unity Catalog privileges.
+
+1. **Get the identity.** In the Azure portal, open your **Foundry project** resource →
+   **Identity → System assigned**, and note the **Application (client) ID** of its managed
+   identity (referred to below as `<project-mi-app-id>`).
+2. **Register it in the workspace.** As a Databricks workspace admin, go to
+   **Settings → Identity and access → Service principals → Add service principal →
+   Microsoft Entra managed**, paste `<project-mi-app-id>`, and grant it **Workspace access**.
+3. **Grant Unity Catalog privileges.** In a SQL editor, run the following (replace the
+   placeholders) — this is packaged as
+   [`databricks/sql/05_grant_mcp_identity.sql`](../../databricks/sql/05_grant_mcp_identity.sql):
+   ```sql
+   GRANT USE CATALOG ON CATALOG <catalog> TO `<project-mi-app-id>`;
+   GRANT USE SCHEMA, SELECT, EXECUTE ON SCHEMA <catalog>.<schema> TO `<project-mi-app-id>`;
+   ```
+   `SELECT` and `EXECUTE` on the schema cascade to every table and function in it.
+
+> **Ownership chaining — do this too.** A Unity Catalog SQL function runs its body with the
+> **function owner's** identity, not the caller's. If `<catalog>` is a workspace **default
+> catalog** (owned by a workspace-admins group), the function owner may hold catalog access only
+> *implicitly*, which breaks the chain and fails at call time with
+> `INSUFFICIENT_PERMISSIONS … the owner of one of the underlying resources failed an
+> authorization check` (SQLSTATE `42501`). Grant the **owner** explicit privileges once:
+> ```sql
+> -- find the owner: SELECT DISTINCT routine_owner
+> --   FROM <catalog>.information_schema.routines WHERE specific_schema='<schema>';
+> GRANT USE CATALOG ON CATALOG <catalog> TO `<function-owner>`;
+> GRANT USE SCHEMA, SELECT, EXECUTE ON SCHEMA <catalog>.<schema> TO `<function-owner>`;
+> ```
+
+## Step 3 — Add the functions MCP server as a tool in Foundry
 Use the **same agent** you connected Genie to, or create one first (see
 [`agent/README.md`](../../agent/README.md)). An agent holds multiple tools, so adding the
 functions server sits **alongside** Genie — it does not replace it.
@@ -85,21 +119,52 @@ it like there is for Genie), so add it via the generic MCP tool flow:
 2. Click **Add**, then choose **Browse all tools** at the bottom of the menu.
 3. In the **Select a tool** dialog, open the **Custom** tab and choose
    **Model Context Protocol (MCP)**.
-4. Fill in:
-   - **Name:** e.g. `databricks-uc-functions`.
-   - **Remote MCP Server endpoint:**
-     `https://<databricks-host>/api/2.0/mcp/functions/<catalog>/<schema>`.
-   - **Authentication:** OAuth identity passthrough (**Managed** / Entra recommended).
+4. In the **Add Model Context Protocol tool** dialog, fill in:
+
+   | Field | Value |
+   |-------|-------|
+   | **Name** | `databricks-uc-functions` |
+   | **Remote MCP Server endpoint** | `https://<databricks-host>/api/2.0/mcp/functions/<catalog>/<schema>` |
+   | **Authentication** | **Microsoft Entra** |
+   | **Type** | **Project Managed Identity** |
+   | **Audience** | `2ff814a6-3304-4ab8-85cb-cd0e6f879c1d` |
+
+   The **Audience** is Azure Databricks' fixed first-party Entra application ID — it is the
+   **same value in every tenant**, so copy it verbatim.
 5. Select **Connect**, then **Create** to attach the tool to the agent.
 
-## Step 3 — Consent and test
-1. In the agent Playground, enter a governed-function prompt (see
-   [`agent/sample-prompts.md`](../../agent/sample-prompts.md)), e.g. *"Assess the customers
-   table and give me the composite score and severity."*
-2. If using OAuth passthrough, click **Open Consent** and sign in with your Entra account.
-3. **Approve** the tool call when prompted.
-4. Confirm the agent returns real numbers — `products` Healthy (~1.0), `customers`/`orders`
-   High Risk with concrete findings.
+> **Why Project Managed Identity?** It is generally available and needs no per-user consent
+> (contrast with Genie's user passthrough). *Agent Identity* is an alternative but is still in
+> Preview.
+
+## Step 4 — Steer tool selection with agent Instructions
+The agent now holds **two** data tools — Genie (open-ended) and the UC functions (governed
+scoring). The model routes on tool **names and descriptions**, so without guidance it may
+answer a scoring question from Genie. Make the choice deterministic: in the agent's
+**Instructions** box, add the following and click **Save**.
+
+```
+You are a data quality assistant for Azure Databricks Unity Catalog.
+
+- To score the data quality of a specific table (customers, orders, or
+  products), you MUST use the databricks-uc-functions tools:
+  assess_customers, assess_orders, assess_products. These return the
+  governed composite score (0-1) and severity.
+- Use Azure Databricks Genie ONLY for open-ended or exploratory questions
+  that the assessment functions do not cover.
+- Never report a table's data-quality score from Genie when an assess_*
+  function exists for that table.
+```
+
+## Step 5 — Test both paths
+1. **Governed scoring (UC functions).** Prompt: *"Assess the customers table and give me the
+   composite score and severity."* Because the tool uses a **service identity, there is no
+   consent prompt.** Expect a six-dimension scorecard — `customers` composite ≈ **0.77
+   (High Risk)** with **Timeliness** the critical dimension, and `products` ≈ **1.0 (Healthy)**.
+   Open **Traces** and confirm the tool span reads **`databricks-uc-functions`**.
+2. **Open-ended (Genie).** Prompt something the functions do not cover, e.g. *"Which product
+   category has the most orders, and what's the total revenue for it?"* The trace span should
+   read **`AzureDatabricksGenie`** (first use triggers the one-time Genie consent).
 
 ## Extending the checks
 Add a new dimension or table by writing another Unity Catalog function in

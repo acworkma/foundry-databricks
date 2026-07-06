@@ -16,7 +16,7 @@ Foundry agent connected to Azure Databricks. Every page is written so you can fo
 | Azure Databricks workspace | [databricks-workspace.md](services/databricks-workspace.md) |
 | Microsoft Foundry account & project | [foundry-account.md](services/foundry-account.md) |
 | Foundry model deployment (gpt-4.1) | [foundry-model-deployment.md](services/foundry-model-deployment.md) |
-| User-assigned managed identity | [managed-identity.md](services/managed-identity.md) |
+| Managed identity (project + user-assigned) | [managed-identity.md](services/managed-identity.md) |
 | Key Vault | [key-vault.md](services/key-vault.md) |
 | Storage account | [storage.md](services/storage.md) |
 | Log Analytics workspace | [log-analytics.md](services/log-analytics.md) |

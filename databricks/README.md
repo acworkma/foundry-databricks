@@ -14,6 +14,7 @@ catalog/schema. Defaults are `datahub_demo` / `quality`.
 | `sql/02_sample_data.sql` | Seed synthetic, non-PII tables with **intentional defects** across all six quality dimensions. |
 | `sql/03_quality_functions.sql` | Unity Catalog functions: scalar scoring helpers + per-table `assess_*` table functions. |
 | `sql/04_run_assessment.sql` | Validation queries: full scorecard, composite score per table, and a "needs attention" list. |
+| `sql/05_grant_mcp_identity.sql` | Grant the Foundry MCP identity access to the functions (+ ownership-chaining fix). Needed for the [UC Functions MCP](../docs/integration/uc-functions-managed-mcp.md) tool. |
 | `run_sql.py` | Dependency-free helper to run the SQL against a SQL warehouse via the Statement Execution API. |
 | `DATA_DICTIONARY.md` | Description of the sample tables and the defects seeded into each. |
 
@@ -84,6 +85,20 @@ Running `04_run_assessment.sql` produces a scorecard like:
 
 The contrast between a healthy table and two problem tables is intentional so a single
 run demonstrates the full severity range.
+
+## Authorize the Foundry MCP identity
+
+The [Unity Catalog Functions MCP](../docs/integration/uc-functions-managed-mcp.md) tool calls
+these functions as the Foundry **project's managed identity** (Microsoft Entra service
+identity). That identity must exist in the workspace as a service principal and hold
+privileges on the `${SCHEMA}` schema. After adding it (Databricks **Settings → Identity and
+access → Service principals → Microsoft Entra managed**, using the project MI Application ID),
+run `sql/05_grant_mcp_identity.sql` — it grants the identity `USE CATALOG` / `USE SCHEMA` /
+`SELECT` / `EXECUTE`, and also fixes **ownership chaining** (a UC SQL function runs its body as
+the function *owner*, so the owner needs an explicit privilege chain too; otherwise calls fail
+with `INSUFFICIENT_PERMISSIONS … SQLSTATE 42501`). See
+[managed-identity.md](../docs/services/managed-identity.md#foundry-project-managed-identity--databricks-uc-functions-mcp)
+for the end-to-end identity flow.
 
 ## How this maps to the agent
 
