@@ -30,8 +30,8 @@ Endpoint:
 https://<databricks-host>/api/2.0/mcp/functions/<catalog>/<schema>
 ```
 
-All functions in that schema become callable tools. In this demo (`<catalog>`/`quality`)
-that includes:
+All functions in that schema become callable tools. In this demo (schema `quality`) that
+includes:
 
 | Function | Kind | What it does |
 |----------|------|--------------|
@@ -115,7 +115,7 @@ functions server sits **alongside** Genie — it does not replace it.
 The functions server is a **custom/remote MCP** connection (there is no first-party tile for
 it like there is for Genie), so add it via the generic MCP tool flow:
 1. In **Microsoft Foundry**, open your agent. In the right-hand **Setup** pane, find the
-   **Tools** section (it already lists **Azure Databricks Genie** from the other pattern).
+   **Tools** section (if you already added **Azure Databricks Genie**, it appears here too).
 2. Click **Add**, then choose **Browse all tools** at the bottom of the menu.
 3. In the **Select a tool** dialog, open the **Custom** tab and choose
    **Model Context Protocol (MCP)**.
@@ -169,8 +169,9 @@ You are a data quality assistant for Azure Databricks Unity Catalog.
 ## Extending the checks
 Add a new dimension or table by writing another Unity Catalog function in
 `databricks/sql/03_quality_functions.sql` and re-running it. It becomes an agent tool
-automatically (all functions in the schema are exposed) — no Foundry change required beyond
-re-consent if permissions change.
+automatically (all functions in the schema are exposed) — no Foundry change required. The
+project managed identity already holds `EXECUTE` on the schema, so new functions are covered
+without re-granting.
 
 ## References
 - [Azure Databricks managed MCP servers](https://learn.microsoft.com/azure/databricks/generative-ai/mcp/managed-mcp)
