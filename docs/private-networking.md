@@ -39,39 +39,29 @@ serverless reaches Unity Catalog storage over its NCC private endpoint.
 ## Architecture
 
 ```mermaid
-flowchart TB
+flowchart LR
     subgraph Hub[Shared hub VNet]
-        subgraph PEsub[Private-endpoint subnet]
-            PEF[Foundry PE]
-            PEU[Databricks ui_api PE]
-            PEB[Databricks browser_auth PE]
-            PES[UC storage PEs<br/>blob + dfs]
-        end
-        subgraph AGsub[Foundry agent subnet]
-            AG[Data Quality Agent<br/>gpt-4.1]
-        end
-        subgraph DBXsub[Databricks host/container subnets<br/>VNet injection]
-            NPIP[Secure Cluster Connectivity]
-        end
+        AG[Foundry Data Quality Agent<br/>gpt-4.1 - agent subnet]
+        PE[Private endpoints<br/>Foundry / Databricks / UC storage]
         DNS[Private DNS zones]
     end
 
-    subgraph Foundry[Microsoft Foundry account/project]
-        PROJ[Project + capability host]
-    end
-    subgraph Databricks[Azure Databricks workspace<br/>public access DISABLED]
+    subgraph DBX[Azure Databricks - public access disabled]
         MCP[Managed MCP servers<br/>functions + genie]
         WH[(Serverless SQL warehouse)]
-        UC[(Unity Catalog<br/>catalog/schema + tables)]
+        UC[(Unity Catalog tables)]
     end
-    NCC[Network Connectivity Config]
-    ST[(UC managed storage<br/>ADLS Gen2, private)]
 
-    AG -- private MCP call --> PEU --> MCP --> WH --> UC
-    NCC -- private endpoint --> ST
+    NCC[Network Connectivity Config]
+    ST[(UC managed storage<br/>ADLS Gen2 - private)]
+
+    AG -->|private MCP call| PE
+    PE --> MCP
+    MCP --> WH
+    WH --> UC
     WH -. serverless egress .-> NCC
-    PROJ --- PEF
-    DNS -. resolves PEs to private IPs .- Hub
+    NCC -. private endpoint .-> ST
+    DNS -. resolves PEs .-> PE
 ```
 
 ### Reuse vs. new
