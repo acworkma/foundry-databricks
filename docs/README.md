@@ -7,6 +7,8 @@ Foundry agent connected to Azure Databricks. Every page is written so you can fo
 
 ## Start here
 - [Architecture](architecture.md) — the end-to-end design and request flow.
+- [Private networking](private-networking.md) — build it with **no public network access**
+  (VNet, private endpoints, NCC, private DNS).
 - [FoundryIQ positioning](foundryiq-positioning.md) — why managed MCP is the primary path and
   where FoundryIQ fits as a complement.
 
@@ -30,6 +32,7 @@ Foundry agent connected to Azure Databricks. Every page is written so you can fo
 
 ## Related folders
 - [`/infra`](../infra) — Bicep to deploy the environment.
+  - [`/infra/private`](../infra/private) — Bicep for the **private** (no public access) build.
 - [`/databricks`](../databricks) — sample data + quality functions (runnable).
 - [`/agent`](../agent) — agent instructions, skill definition, and sample prompts.
 
