@@ -68,6 +68,11 @@ The Databricks **managed MCP** preview, the **Genie Space**, and the **Foundry t
 connections** are Public Preview portal steps and are not ARM/Bicep-deployable today. See
 [`docs/integration/`](../docs/integration/).
 
+## Private (no public network access) build
+To build the same solution with **no public network access** (VNet injection, private
+endpoints, NCC for serverless egress, private DNS), use [`infra/private/`](private/) and follow
+[`docs/private-networking.md`](../docs/private-networking.md).
+
 ## Clean up
 ```bash
 az group delete -n <resource-group> --yes --no-wait
