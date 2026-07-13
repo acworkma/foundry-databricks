@@ -23,6 +23,8 @@ IDs to your environment — all example values are illustrative placeholders.
 | `foundry/capability-host.bicep` | Foundry RG | Capability host (Agents) for the project. |
 | `foundry/format-workspace-id.bicep` | — | Formats the project `internalId` into a GUID for scoped role assignments. |
 | `foundry/rbac-container.bicep` | Foundry RG | Container/data-plane role assignments (blob data owner condition + Cosmos SQL role). |
+| `custom-mcp/container-app.bicep` | Spoke RG | **Option B**: custom MCP server on a private, internal Azure Container App (user-assigned pull identity + AcrPull) — reuses the existing internal ACA environment and private ACR. |
+| `custom-mcp/entra-app.bicep` | Tenant | **Option B**: Entra OAuth client app + service principal + admin-consent grant for Azure Databricks `user_impersonation` (Microsoft Graph Bicep extension). |
 
 ## Deploy order
 
@@ -38,6 +40,10 @@ IDs to your environment — all example values are illustrative placeholders.
 6. Set `storagePublicNetworkAccess=Disabled` and redeploy `uc-storage.bicep` once the NCC
    private path is validated.
 7. **`foundry/main.bicep`** → Foundry RG (project + RBAC + capability host).
+8. **`custom-mcp/`** (Option B, optional) → build the image (`az acr build` into the private
+   registry), create a dedicated Pro warehouse, then deploy `custom-mcp/entra-app.bicep`
+   (tenant) and `custom-mcp/container-app.bicep` (spoke RG). Full walkthrough in
+   [`docs/integration/custom-mcp-server.md`](../../docs/integration/custom-mcp-server.md).
 
 ```bash
 # Examples — run via WSL/Linux. Substitute your own names/IDs.
@@ -77,6 +83,8 @@ az deployment group create -g <foundry-rg> \
   shared account the project uses project-unique connection names that still target the shared
   Search/Storage/Cosmos resources.
 - **Not Bicep-deployable (Public Preview / portal):** the NCC and its rules, the Managed MCP
-  Servers preview, the Genie space, and the agent's MCP tool connections. See
-  [`docs/private-networking.md`](../../docs/private-networking.md) and
+  Servers preview, the Genie space, and the agent's MCP tool connections. For the custom MCP
+  (Option B), the OAuth **client secret** and the Foundry **redirect URI** are also post-steps
+  (Bicep can't output secrets; the redirect URI is only known after the Foundry connection
+  exists). See [`docs/private-networking.md`](../../docs/private-networking.md) and
   [`docs/integration/`](../../docs/integration/).

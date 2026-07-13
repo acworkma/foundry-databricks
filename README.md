@@ -30,7 +30,7 @@ solution up in **your own Azure subscription** using the included Bicep and step
 | --- | --- | --- |
 | **Genie Space (managed MCP)** | Natural-language Q&A over your data via a Databricks Genie Space, added to Foundry as an MCP tool. | **Built** |
 | **Unity Catalog Functions (managed MCP)** | Data-quality checks and scoring implemented as governed UC functions, called by the agent as tools. | **Built** |
-| **Custom MCP server** | Your own Python MCP server (wrapping the Databricks SQL Statement Execution API + a scoring engine) hosted on Azure Container Apps and registered in Foundry. | **Documented** |
+| **Custom MCP server** | Your own Python MCP server (wrapping the Databricks SQL Statement Execution API + a scoring engine) on **dedicated compute**, hosted on a private Azure Container App and registered in Foundry via OAuth passthrough. | **Built** |
 
 > See [`docs/integration/`](docs/integration/) for a page on each pattern, and
 > [`docs/foundryiq-positioning.md`](docs/foundryiq-positioning.md) for where Foundry IQ fits.

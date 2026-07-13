@@ -9,8 +9,8 @@ It is the private counterpart to the public reference build. The agent, the six-
 quality model, and both managed MCP paths are **unchanged** — only the network posture changes.
 
 > **Scope.** This page covers **Option A (serverless)**: the two already-built managed MCP
-> paths running private on serverless SQL. A future **Option B (dedicated compute)** for a
-> custom MCP server is sketched at the end and built later — see
+> paths running private on serverless SQL. **Option B (dedicated compute)** — a custom MCP
+> server on a dedicated Pro warehouse — is now **built**; see
 > [`custom-mcp-server.md`](integration/custom-mcp-server.md).
 
 All bracketed values (e.g. `<shared-vnet>`, `<databricks-host>`, `<foundry-account>`,
@@ -247,16 +247,19 @@ build (only the host now resolves to a private IP):
 
 ---
 
-## Future — Option B (dedicated compute, custom MCP)
+## Option B (dedicated compute, custom MCP) — built
 
-When you add a **custom MCP server** on dedicated/classic compute, layer on:
+The **custom MCP server** runs on dedicated/classic compute. As built in this project:
 
-- A dedicated **spoke VNet** (non-overlapping) peered to the hub.
-- **VNet injection** + **Secure Cluster Connectivity** + **back-end Private Link** (relay +
-  REST API) in addition to front-end Private Link.
-- A **classic/Pro SQL warehouse** (not serverless) for the dedicated-compute path.
-- The **custom MCP server** on a private compute host (e.g. Container Apps) behind private
-  ingress, calling the classic warehouse via the SQL Statement Execution API.
+- A **dedicated Pro SQL warehouse** (not serverless) in the existing private workspace.
+- The **custom MCP server** on a **private, internal Azure Container App**, pulling its image
+  from the private ACR and calling the Pro warehouse via the SQL Statement Execution API.
+- **Front-end Private Link** to the workspace is sufficient for the Statement Execution API
+  path; **back-end Private Link** (SCC relay + REST for classic clusters) is optional hardening,
+  documented but not required here.
+- Auth is **OAuth Identity Passthrough** (Custom provider) — the signed-in user's Databricks
+  token is forwarded through to Unity Catalog.
 
-This is captured for later and does not affect the serverless managed-MCP paths above. See
+For a fully isolated deployment you may additionally use a dedicated spoke VNet with **VNet
+injection** + **Secure Cluster Connectivity** + back-end Private Link. See
 [`custom-mcp-server.md`](integration/custom-mcp-server.md).

@@ -1,85 +1,220 @@
-# Custom MCP server (build-your-own)
+# Custom MCP server (build-your-own, dedicated compute)
 
-**Status: documented only (not deployed in this demo).** &nbsp;·&nbsp; This is the
-"build-your-own" option for teams that need logic beyond what governed Unity Catalog
-functions or Genie provide.
+**Status: built and verified private in this project.** &nbsp;·&nbsp; This is the
+"build-your-own" pattern for teams that need logic beyond governed Unity Catalog functions
+or Genie — an **"assess any table"** tool with your own code path, running on **dedicated
+(classic) compute** with **no public network access**.
 
-Host your **own** MCP server (e.g. in Python) on **Azure Container Apps**. It wraps the
-Databricks **SQL Statement Execution API** and your own scoring engine, and registers with
-Foundry as a custom remote MCP tool. This gives you full control: dynamic "assess any table"
-logic, custom rule packs, caching, and result persistence.
+Unlike the two managed MCP paths (Unity Catalog Functions and Genie, which run on
+**serverless**), this pattern hosts your **own** MCP server on **Azure Container Apps** and
+points it at a **dedicated Pro SQL warehouse**. The server wraps the Databricks **SQL
+Statement Execution API** plus the same six-dimension scoring engine used by the UC Functions
+path, so results are directly comparable to the baseline.
 
 ## When to use it
 - You need to assess **arbitrary** tables with a single tool and want **your own** code path
-  (not Genie) to generate the SQL.
-- You want to enforce a house rule library, write results to a history table, or add caching
-  / rate-limit handling.
+  (not Genie) to generate and score the SQL.
+- Your organisation requires the custom path to run on **dedicated compute** rather than
+  serverless (a common data-residency / cost-isolation requirement).
+- You want a house rule-pack library, a generic profiler for unknown tables, result caching,
+  or history — logic that does not fit cleanly into per-table UC functions.
 - You want the MCP server portable across agent platforms, not tied to Databricks-managed
   endpoints.
 
-## Architecture
+## How it works
 
 ```mermaid
 flowchart LR
-    A[Foundry agent<br/>gpt-4.1] -- MCP tool call --> B[Custom MCP server<br/>Azure Container Apps]
-    B -- SQL Statement Execution API --> C[(Databricks SQL warehouse)]
-    C --> D[(Unity Catalog tables)]
-    B -- optional --> E[(Results history table)]
-    D --> C --> B --> A
+    U[User in Foundry Playground] --> AG[Dedicated agent - gpt-4.1]
+    AG -->|MCP tool call - Bearer user token| MCP[Custom MCP server - private Container App]
+    MCP -->|SQL Statement Execution API - same user token| WH[Dedicated Pro SQL warehouse]
+    WH --> UC[Unity Catalog tables]
+    OA[Foundry OAuth passthrough - Custom provider] -.->|Databricks-scoped user token| AG
 ```
 
-Key components:
-- **Azure Container Apps** — serverless container host for the MCP server (scales to zero).
-- **The MCP server** — a small Python app exposing tools like `assess_table(catalog, schema,
-  table)` and `list_tables(catalog, schema)`; implements the MCP protocol over HTTP.
-- **Databricks SQL Statement Execution API** — `POST /api/2.0/sql/statements` with a
-  `warehouse_id`; the server builds profiling SQL dynamically and reads results.
-- **Managed identity** — the Container App authenticates to Databricks with an Entra token
-  (resource `2ff814a6-3304-4ab8-85cb-cd0e6f879c1d`) instead of storing a PAT.
+- The Foundry agent uses **OAuth Identity Passthrough (Custom provider)** to obtain a token
+  scoped to Azure Databricks (`2ff814a6-3304-4ab8-85cb-cd0e6f879c1d/user_impersonation`) on the
+  **signed-in user's** behalf, and forwards it as `Authorization: Bearer` on every tool call.
+- The MCP server **forwards that same token** to the SQL Statement Execution API. It holds **no
+  service credential** of its own for the data path — Unity Catalog enforces each caller's own
+  grants, and the Databricks audit log shows the real user.
+- The server runs on a **dedicated Pro (classic) SQL warehouse**, not serverless.
 
-## Design sketch
+### Auth model (approach A — direct passthrough)
 
-The server would expose an `assess_table` tool that, for any table:
-1. Reads the table schema (`DESCRIBE`) to pick applicable checks per column type.
-2. Generates one profiling query per dimension (completeness, uniqueness, validity,
-   timeliness, consistency where FKs are known, accuracy from a rule pack).
-3. Runs them via the SQL Statement Execution API against a configured warehouse.
-4. Applies the same scoring model as the repo functions (`1 - issues/checks`, composite,
-   severity bands) so results are comparable to the Unity Catalog Functions pattern.
-5. Returns the JSON output contract from [`agent/SKILL.md`](../../agent/SKILL.md) and,
-   optionally, writes a row to a `quality.assessment_history` table for trending.
+The MCP server never stores a Databricks secret. The Entra **OAuth client app** lives in
+Foundry's connection; Foundry requests the Databricks-scoped user token and passes it through.
+An **on-behalf-of (OBO) exchange** is a documented fallback if you would rather protect the
+endpoint by its own audience — but for the passthrough design here it is not required.
 
-The repo's `databricks/run_sql.py` is a minimal reference for talking to the Statement
-Execution API (auth, submit, poll) that this server would build on.
+## Prerequisites
+- The private Databricks workspace from the [private-networking build](../private-networking.md)
+  (VNet-injected, `publicNetworkAccess=Disabled`), with the `<catalog>.<schema>` sample data and
+  scoring functions seeded.
+- An existing **internal (VNet-injected) Azure Container Apps environment** and an existing
+  **private Azure Container Registry** (`publicNetworkAccess=Disabled`) in the shared hub — this
+  project reuses both rather than deploying new ones.
+- Azure CLI + Bicep, run from a host with private line-of-sight to the workspace (VPN / DevBox).
+- Permission to create an Entra app registration and grant admin consent.
 
-## Outline of build steps (when you implement it)
-1. **Write the MCP server** (Python; an MCP SDK or a lightweight HTTP+JSON-RPC handler).
-   Tools: `list_tables`, `assess_table`, `get_history`.
-2. **Containerize** it (Dockerfile) and push to **Azure Container Registry**.
-3. **Deploy to Azure Container Apps** with ingress enabled and a system-assigned managed
-   identity; grant that identity access to Databricks and the warehouse.
-4. **Store config** (workspace host, warehouse id) as Container App settings; no secrets if
-   using managed identity.
-5. **Register in Foundry** via the custom MCP tool flow (same as the Unity Catalog Functions
-   pattern's Step 2), pointing
-   at `https://<container-app-fqdn>/mcp` with the appropriate authentication.
-6. **Add auth** — protect the endpoint (Entra / Easy Auth) and use OAuth identity passthrough
-   or on-behalf-of so row-level Unity Catalog governance still applies.
+> Every Foundry user who calls the tool must be a Databricks principal with Unity Catalog grants
+> on the tables and `CAN USE` on the warehouse. See Step 6.
+
+## Step 1 — Build the image into the private registry
+The MCP server source is in [`mcp-server/`](../../mcp-server/) (see its
+[README](../../mcp-server/README.md)). Build straight into the private ACR — no local Docker
+needed:
+
+```bash
+az acr build --registry <registry-name> --image dq-mcp-server:v1 mcp-server/
+```
+
+> If the registry has `publicNetworkAccess=Disabled`, `az acr build` cannot use the shared build
+> agent (its IP is firewalled out). Create a **dedicated agent pool** in a subnet of the hub VNet
+> and pass `--agent-pool <pool>`; the build then runs inside your network. Delete the pool when
+> you are done iterating.
+
+## Step 2 — Create the dedicated Pro SQL warehouse
+Create a **Pro (classic, non-serverless)** warehouse in the private workspace and capture its id:
+
+```bash
+databricks warehouses create --json '{
+  "name": "dq-dedicated-pro",
+  "warehouse_type": "PRO",
+  "enable_serverless_compute": false,
+  "cluster_size": "2X-Small",
+  "auto_stop_mins": 10
+}'
+```
+
+> A classic Pro warehouse cold-starts in ~4 minutes (it provisions VMs), noticeably slower than
+> serverless. The server polls the warehouse to `RUNNING` before issuing statements.
+
+## Step 3 — Deploy the MCP server to Container Apps
+Deploy with [`infra/private/custom-mcp/container-app.bicep`](../../infra/private/custom-mcp/container-app.bicep).
+It creates a user-assigned identity, grants it **AcrPull** on the private registry, and deploys
+the app into the **existing internal environment**:
+
+```bash
+az deployment group create \
+  --resource-group <spoke-resource-group> \
+  --template-file infra/private/custom-mcp/container-app.bicep \
+  --parameters \
+      managedEnvironmentId=<aca-environment-resource-id> \
+      acrLoginServer=<registry-name>.azurecr.io \
+      acrResourceId=<acr-resource-id> \
+      image=<registry-name>.azurecr.io/dq-mcp-server:v1 \
+      databricksHost=<databricks-host> \
+      databricksWarehouseId=<warehouse-id>
+```
+
+Notes for an **internal** Container Apps environment:
+- Set ingress `external: true`. On an internal environment this is still **private-only** (the
+  whole environment has no public IP), but it lets the environment's envoy route the app. With
+  `external: false` the FQDN is `<app>.internal.<domain>` and returns a 404 "Unavailable".
+- The MCP SDK enables **DNS-rebinding protection** by default and rejects non-localhost `Host`
+  headers with HTTP 421. The template sets `MCP_ALLOWED_HOSTS` to the ingress FQDN so the private
+  host is allow-listed. (Behind a trusted proxy you may instead disable the check.)
+
+Verify the endpoint from inside the VNet:
+
+```bash
+TOKEN=$(az account get-access-token --resource 2ff814a6-3304-4ab8-85cb-cd0e6f879c1d --query accessToken -o tsv)
+curl -s https://<container-app-fqdn>/mcp \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
+```
+
+You should see `list_tables` and `assess_table`.
+
+## Step 4 — Register the Entra OAuth client app
+Foundry's OAuth passthrough needs an Entra application to act as the OAuth **client**. Deploy
+[`infra/private/custom-mcp/entra-app.bicep`](../../infra/private/custom-mcp/entra-app.bicep)
+(Microsoft Graph Bicep extension). It creates the app + service principal and admin-consents the
+Azure Databricks `user_impersonation` delegated permission.
+
+Two things Bicep cannot emit declaratively — do them as post-steps:
+
+```bash
+# 1) Generate a client secret for the Foundry connection (Bicep cannot output secrets):
+az ad app credential reset --id <client-id> --display-name foundry-oauth --years 1
+
+# 2) After the Foundry OAuth connection exists (Step 5), add its redirect URI back to the app:
+az ad app update --id <client-id> --web-redirect-uris <foundry-redirect-uri>
+```
+
+The portal equivalent (App registrations → New registration → API permissions → add Azure
+Databricks `user_impersonation` → Grant admin consent → Certificates & secrets → New client
+secret) is fully supported if you prefer clicking.
+
+## Step 5 — Add the custom MCP tool in Foundry (dedicated agent)
+Create a **new, dedicated agent** so the custom-server path is demoed cleanly, separate from the
+managed agent:
+
+1. In the Foundry portal, create an agent `data-quality-agent-dedicated` (model `gpt-4.1`).
+2. **Add tool → Custom → MCP.**
+   - **Server URL:** `https://<container-app-fqdn>/mcp`
+   - **Authentication:** **OAuth Identity Passthrough → Custom** with:
+     - Authorize URL: `https://login.microsoftonline.com/<tenant-id>/oauth2/v2.0/authorize`
+     - Token URL: `https://login.microsoftonline.com/<tenant-id>/oauth2/v2.0/token`
+     - Client ID / Client secret: from Step 4
+     - Scope: `2ff814a6-3304-4ab8-85cb-cd0e6f879c1d/user_impersonation offline_access`
+   - Use a **dash-only** connection name (underscores are rejected by name validation).
+3. Copy the connection's **redirect URI** and complete post-step 2 in Step 4.
+4. Give the agent Instructions that route "assess any table / check data quality on
+   `<catalog>.<schema>.<table>`" requests to the `assess_table` tool and reuse the six-dimension
+   scoring contract from [`agent/SKILL.md`](../../agent/SKILL.md).
+
+> The tool endpoint (`server_url`) is fixed by the connection and is **not editable** after the
+> connection is created — create a new connection if it changes.
+
+## Step 6 — Grant the user in Databricks and test
+Grant your test user Unity Catalog + warehouse access, then verify in the Playground:
+
+```sql
+GRANT USE CATALOG ON CATALOG <catalog> TO `<user@tenant>`;
+GRANT USE SCHEMA  ON SCHEMA  <catalog>.<schema> TO `<user@tenant>`;
+GRANT SELECT      ON SCHEMA  <catalog>.<schema> TO `<user@tenant>`;
+-- plus CAN USE on the dedicated warehouse (Warehouse → Permissions in the UI)
+```
+
+In the Playground, sign in / consent once, then ask the dedicated agent to *"assess the data
+quality of `<catalog>.<schema>.customers`"*. Confirm:
+- a **custom-MCP tool span** in the trace,
+- a **composite score matching the baseline** (the seeded `customers` table scores ~0.77 "High
+  Risk"; the healthy `products` table scores 1.0),
+- the Databricks audit log attributes the query to **your user**, and
+- all traffic stayed **private** (the workspace resolves to its private-endpoint IP).
+
+## Private networking
+- **Front-end** access is already private: the MCP server calls the workspace REST API through
+  the existing `databricks_ui_api` **private endpoint**, and Foundry reaches the Container App
+  over the environment's private ingress (no public IP anywhere in the path).
+- **Back-end Private Link** (the SCC relay + REST channel used by classic clusters) is an
+  **optional** enhancement. The SQL Statement Execution API path used here does not require it, so
+  this build documents it as future hardening rather than deploying it.
 
 ## Trade-offs vs. the other patterns
 | | Genie | UC functions | Custom MCP server |
 |-|-------------------|--------------------------|--------------------|
+| Compute | serverless | serverless | **dedicated (Pro)** |
 | Arbitrary tables | ✅ | ❌ (per-table) | ✅ |
-| Deterministic | ⚠️ NL-driven | ✅ | ✅ |
+| Deterministic scoring | ⚠️ NL-driven | ✅ | ✅ |
 | You host code | ❌ | ❌ | ✅ (Container Apps) |
-| Custom rule packs / history | ⚠️ limited | ⚠️ via more functions | ✅ |
+| Custom rule packs / generic profiler | ⚠️ limited | ⚠️ via more functions | ✅ |
+| Auth | OAuth passthrough | Entra + Project MI | OAuth passthrough |
 | Ops overhead | lowest | low | highest |
 
-Most teams should start with **Genie + UC functions** (as this demo does) and only reach for a
-**custom MCP server** when they outgrow both.
+Most teams should start with **Genie + UC functions** and reach for a **custom MCP server** only
+when they need arbitrary-table scoring on dedicated compute or logic the managed paths can't
+express.
 
 ## References
 - [Databricks SQL Statement Execution API](https://learn.microsoft.com/azure/databricks/sql/api/sql-execution-tutorial)
 - [Azure Container Apps overview](https://learn.microsoft.com/azure/container-apps/overview)
+- [Build images with a private ACR agent pool](https://learn.microsoft.com/azure/container-registry/tasks-agent-pools)
+- [Microsoft Graph Bicep extension](https://learn.microsoft.com/graph/templates/bicep/overview)
 - [Model Context Protocol](https://modelcontextprotocol.io/)
 - [Connect a custom MCP server to a Foundry agent](https://learn.microsoft.com/azure/azure-functions/functions-mcp-foundry-tools)
