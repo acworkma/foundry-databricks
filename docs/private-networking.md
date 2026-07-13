@@ -196,12 +196,20 @@ See [`/databricks`](../databricks) for the runnable SQL and the grant script.
 
 ## Step 8 — Wire the two managed MCP paths (private)
 
-Create the agent and attach both managed MCP tools. Auth is **Microsoft Entra ID → Project
-Managed Identity** with audience `2ff814a6-3304-4ab8-85cb-cd0e6f879c1d` (the Azure Databricks
-first-party application ID — the same value in every tenant). No secrets, no consent prompt.
+Create the agent and attach both managed MCP tools **in the Foundry portal** (the tool-wiring
+is a Public Preview click-op — it creates a Foundry connection for you; it is not scriptable via
+the Agents API today). The two paths use **different** auth models:
 
 - **UC Functions MCP** — `https://<databricks-host>/api/2.0/mcp/functions/<catalog>/<schema>`
+  Auth: **Microsoft Entra → Project Managed Identity**, audience
+  `2ff814a6-3304-4ab8-85cb-cd0e6f879c1d` (the Azure Databricks first-party application ID — the
+  same value in every tenant). A service identity: **no secrets, no user sign-in, no consent**.
 - **Genie MCP** — `https://<databricks-host>/api/2.0/mcp/genie/<genie-space-id>`
+  Auth: **OAuth Identity Passthrough (Managed)** — Genie runs **as the signed-in user**, so the
+  first call prompts a one-time Entra sign-in/consent in the Playground.
+
+> **Connection names** allow letters, numbers, dashes, and dots only — **no underscores**
+> (e.g. `databricks-uc-functions`, `databricks-genie`).
 
 Follow the integration pages for the exact tool setup — they apply unchanged in the private
 build (only the host now resolves to a private IP):
