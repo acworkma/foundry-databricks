@@ -1,0 +1,4 @@
+# Custom MCP server runtime dependencies.
+# The MCP SDK brings in Starlette + uvicorn for the streamable-HTTP transport.
+mcp>=1.2.0
+uvicorn>=0.30.0
