@@ -19,6 +19,7 @@ import os
 from typing import Any
 
 from mcp.server.fastmcp import Context, FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 
 import rulepacks
 import scoring
@@ -26,6 +27,27 @@ from databricks_client import DatabricksError, DatabricksSqlClient
 
 DATABRICKS_HOST = os.environ.get("DATABRICKS_HOST", "")
 DATABRICKS_WAREHOUSE_ID = os.environ.get("DATABRICKS_WAREHOUSE_ID", "")
+
+
+def _transport_security() -> TransportSecuritySettings:
+    """Configure DNS-rebinding protection for the streamable-HTTP transport.
+
+    The MCP SDK rejects requests whose Host header is not allow-listed (HTTP 421).
+    Behind a trusted private reverse proxy (e.g. internal Azure Container Apps ingress)
+    the proxy already controls the Host header, so either allow-list the public FQDN via
+    ``MCP_ALLOWED_HOSTS`` (comma-separated) or disable the check by leaving it unset.
+    """
+    allowed = [h.strip() for h in os.environ.get("MCP_ALLOWED_HOSTS", "").split(",") if h.strip()]
+    if allowed:
+        # Accept each host with and without an explicit port.
+        hosts: list[str] = []
+        for h in allowed:
+            hosts.append(h)
+            if ":" not in h:
+                hosts.append(f"{h}:*")
+        return TransportSecuritySettings(enable_dns_rebinding_protection=True, allowed_hosts=hosts)
+    return TransportSecuritySettings(enable_dns_rebinding_protection=False)
+
 
 mcp = FastMCP(
     name="databricks-data-quality",
@@ -35,6 +57,7 @@ mcp = FastMCP(
         "in a schema."
     ),
     stateless_http=True,
+    transport_security=_transport_security(),
 )
 
 
